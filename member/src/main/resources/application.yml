@@ -3,36 +3,3 @@ spring:
     name: member-service
   config:
     import: "optional:configserver:http://localhost:18888"
-  
-  # 마스터-슬레이브 데이터베이스 설정
-  datasource:
-    master:
-      hikari:
-        pool-name: Hikari-MASTER
-        username: root
-        password: 1234
-        driver-class-name: com.mysql.cj.jdbc.Driver
-        jdbc-url: jdbc:mysql://localhost:4306/msadb?useSSL=false&serverTimezone=Asia/Seoul&characterEncoding=UTF-8
-        connection-timeout: 30000
-        maximum-pool-size: 10
-        minimum-idle: 5
-    slave:
-      hikari:
-        pool-name: Hikari-SLAVE
-        username: root
-        password: 1234
-        driver-class-name: com.mysql.cj.jdbc.Driver
-        jdbc-url: jdbc:mysql://localhost:4307/msadb?useSSL=false&serverTimezone=Asia/Seoul&characterEncoding=UTF-8
-        connection-timeout: 30000
-        maximum-pool-size: 10
-        minimum-idle: 5
-
-# 로깅 설정
-logging:
-  level:
-    root: INFO
-    org.springframework.web: INFO
-    org.hibernate: INFO
-    com.msa: DEBUG
-    com.msa.member.config.datasource: DEBUG
-    org.springframework.boot.autoconfigure.jdbc: DEBUG

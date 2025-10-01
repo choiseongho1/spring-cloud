@@ -7,12 +7,19 @@ spring:
       server:
         webflux:
           routes:
-            - id: member-service-alt
+            - id: member-service
               uri: lb://member-service
               predicates:
                 - Path=/member-service/**
               filters:
                 - RewritePath=/member-service/(?<segment>.*), /api/members/${segment}
+            - id: auth-service
+              uri: lb://auth-service
+              predicates:
+                - Path=/auth-service/**
+              filters:
+                - RewritePath=/auth-service/(?<segment>.*), /api/auth/${segment}
+
 eureka:
   client:
     register-with-eureka: true
@@ -28,3 +35,7 @@ management:
   endpoint:
     health:
       show-details: always
+
+
+jwt:
+  secret: ${JWT_SECRET:defaultSecretKeyForDevelopmentEnvironmentOnly}

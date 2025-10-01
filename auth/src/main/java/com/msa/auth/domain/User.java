@@ -1,4 +1,4 @@
-package com.msa.member.domain;
+package com.msa.auth.domain;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -15,34 +15,34 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 @Entity
-@Table(name = "members")
+@Table(name = "users")
 @Getter
 @Setter
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class Member {
+public class User {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    private String name;
-
-    private String email;
-
-    private Integer age;
-    
     @Column(unique = true, nullable = false)
     private String username;
-    
+
     @Column(nullable = false)
     private String password;
-    
+
+    @Column(nullable = false)
+    private String name;
+
+    @Column(nullable = false)
+    private String email;
+
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private Role role;
-    
+
     public enum Role {
         ROLE_USER,
         ROLE_ADMIN

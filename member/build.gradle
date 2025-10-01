@@ -33,7 +33,7 @@ dependencies {
 	compileOnly 'org.projectlombok:lombok'
 	annotationProcessor 'org.projectlombok:lombok'
 	implementation 'org.projectlombok:lombok'
-	
+
 
 	implementation 'org.springframework.cloud:spring-cloud-starter-netflix-eureka-client'
 	implementation 'org.springframework.cloud:spring-cloud-starter-config'
@@ -41,6 +41,14 @@ dependencies {
 
 	// 데이터베이스
 	implementation 'com.mysql:mysql-connector-j'
+	implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
+
+
+	// Validation
+	implementation 'org.springframework.boot:spring-boot-starter-validation'
+
+	// Spring Security (비밀번호 암호화용)
+	implementation 'org.springframework.security:spring-security-crypto'
 
 
 }

@@ -1,10 +1,10 @@
-package com.msa.member;
+package com.msa.auth;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 
 @SpringBootTest
-class MemberApplicationTests {
+class AuthApplicationTests {
 
 	@Test
 	void contextLoads() {
