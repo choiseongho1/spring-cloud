@@ -50,23 +50,17 @@ public class AuthService {
         
         Authentication authentication;
         try {
-            // 인증
-            log.debug("[로그인] 인증 시도: {}", loginRequest.getUsername());
-            // 일반 비밀번호를 사용하여 인증 시도
+            // 인증 시도
             authentication = authenticationManager.authenticate(
                     new UsernamePasswordAuthenticationToken(
                             loginRequest.getUsername(),
-                            loginRequest.getPassword() // 암호화하지 않은 원본 비밀번호 사용
+                            loginRequest.getPassword()
                     )
             );
             log.info("[로그인] 인증 성공: {}", loginRequest.getUsername());
-            log.debug("[로그인] 인증 객체 정보: principal={}, authorities={}", 
-                    authentication.getPrincipal().getClass().getName(),
-                    authentication.getAuthorities());
 
             // SecurityContext에 인증 정보 저장
             SecurityContextHolder.getContext().setAuthentication(authentication);
-            log.debug("[로그인] SecurityContext에 인증 정보 저장 완료");
         } catch (Exception e) {
             log.error("[로그인] 인증 실패: {}, 오류: {}", loginRequest.getUsername(), e.getMessage());
             log.error("[로그인] 오류 상세", e); // 스택 트레이스 출력
