@@ -24,6 +24,17 @@ services:
       MYSQL_PASSWORD: 1234
     ports:
       - "4399:3306"
+      
+  redis:
+    image: redis:7.0
+    container_name: redis
+    restart: always
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    command: redis-server --appendonly yes
 
 volumes:
   db_data:
+  redis_data:

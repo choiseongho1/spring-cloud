@@ -3,27 +3,17 @@ package com.msa.auth.service;
 import com.msa.auth.client.MemberServiceClient;
 import com.msa.auth.client.dto.MemberDto;
 import com.msa.auth.config.JwtTokenProvider;
-import com.msa.auth.domain.RefreshToken;
 import com.msa.auth.dto.LoginRequest;
 import com.msa.auth.dto.TokenDto;
-import com.msa.auth.repository.RefreshTokenRepository;
-
-import com.msa.common.util.PasswordUtil;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-
 import org.springframework.beans.factory.annotation.Value;
-
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
-import java.time.Instant;
-import java.util.Date;
 
 @Slf4j
 @Service
@@ -32,7 +22,7 @@ public class AuthService {
 
     private final AuthenticationManager authenticationManager;
     private final JwtTokenProvider jwtTokenProvider;
-    private final RefreshTokenRepository refreshTokenRepository;
+    private final RefreshTokenService refreshTokenService;
     private final MemberServiceClient memberServiceClient;
     
     @Value("${jwt.refresh-token-validity:604800000}") // 7일 (밀리초)
@@ -114,19 +104,13 @@ public class AuthService {
         // 토큰에서 사용자 이름 추출
         String username = jwtTokenProvider.getUsernameFromToken(refreshToken);
 
-        // DB에 저장된 리프레시 토큰 조회
-        RefreshToken savedToken = refreshTokenRepository.findByUsername(username)
+        // Redis에 저장된 리프레시 토큰 조회
+        String savedToken = refreshTokenService.findByUsername(username)
                 .orElseThrow(() -> new RuntimeException("저장된 리프레시 토큰이 없습니다"));
 
         // 토큰 일치 확인
-        if (!savedToken.getToken().equals(refreshToken)) {
+        if (!savedToken.equals(refreshToken)) {
             throw new RuntimeException("리프레시 토큰이 일치하지 않습니다");
-        }
-
-        // 토큰 만료 확인
-        if (savedToken.isExpired()) {
-            refreshTokenRepository.delete(savedToken);
-            throw new RuntimeException("리프레시 토큰이 만료되었습니다");
         }
 
         // 새 토큰 생성을 위한 인증 객체 생성
@@ -166,7 +150,7 @@ public class AuthService {
     public void logout(String refreshToken) {
         if (jwtTokenProvider.validateToken(refreshToken)) {
             String username = jwtTokenProvider.getUsernameFromToken(refreshToken);
-            refreshTokenRepository.deleteByUsername(username);
+            refreshTokenService.deleteByUsername(username);
         }
     }
 
@@ -174,24 +158,6 @@ public class AuthService {
      * 리프레시 토큰 저장
      */
     private void saveRefreshToken(String username, String token) {
-        log.debug("[리프레시 토큰] 저장 시도: {}", username);
-        
-        try {
-            Instant expiryDate = Instant.now().plusMillis(refreshTokenValidity);
-            log.debug("[리프레시 토큰] 만료 시간 설정: {}", expiryDate);
-
-            RefreshToken refreshToken = RefreshToken.builder()
-                    .token(token)
-                    .username(username)
-                    .expiryDate(expiryDate)
-                    .build();
-
-            refreshTokenRepository.save(refreshToken);
-            log.info("[리프레시 토큰] 저장 성공: {}", username);
-        } catch (Exception e) {
-            log.error("[리프레시 토큰] 저장 실패: {}, 오류: {}", username, e.getMessage());
-            log.error("[리프레시 토큰] 오류 상세", e);
-            throw e; // 예외 재발생
-        }
+        refreshTokenService.saveRefreshToken(username, token);
     }
 }

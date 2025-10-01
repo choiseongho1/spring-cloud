@@ -15,24 +15,20 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Component;
 
 import java.security.Key;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
 @Component
 public class JwtTokenProvider {
 
-//    @Value("${jwt.secret:defaultSecretKeyForDevelopmentEnvironmentOnly}")
-    private String secret = "ce9a4a38b29c53ea18eac9c03d6e55eb246de75f9c584564d246b367f28490fe";
+    @Value("${jwt.secret}")
+    private String secret ;
 
-    @Value("${jwt.access-token-validity:1800000}") // 30분 (밀리초)
+    @Value("${jwt.access-token-validity}") // 30분 (밀리초)
     private long accessTokenValidity;
 
-    @Value("${jwt.refresh-token-validity:604800000}") // 7일 (밀리초)
+    @Value("${jwt.refresh-token-validity}") // 7일 (밀리초)
     private long refreshTokenValidity;
 
     // JWT 토큰에서 사용자 이름 추출
