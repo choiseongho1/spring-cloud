@@ -1,3 +1,4 @@
 rootProject.name = 'member'
 
-include 'common'
+include ':common'
+project(':common').projectDir = new File(settingsDir, '../common') // 필요에 따라 경로 수정

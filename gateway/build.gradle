@@ -34,9 +34,6 @@ dependencies {
     compileOnly 'org.projectlombok:lombok'
     annotationProcessor 'org.projectlombok:lombok'
     
-    // Redis Rate Limiter
-    implementation 'org.springframework.boot:spring-boot-starter-data-redis-reactive'
-    
     testImplementation 'org.springframework.boot:spring-boot-starter-test'
 }
 
