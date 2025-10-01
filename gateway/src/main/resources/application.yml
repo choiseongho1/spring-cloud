@@ -1,9 +1,33 @@
 server:
   port: 8000
 
+spring:
+  application:
+    name: gateway-service
+  cloud:
+    gateway:
+      server:
+        webflux:
+          routes:
+            - id: member-service-alt
+              uri: lb://member-service
+              predicates:
+                - Path=/member-service/**
+              filters:
+                - RewritePath=/member-service/(?<segment>.*), /api/members/${segment}
+
 eureka:
   client:
-    register-with-eureka: false
-    fetch-registry: false
+    register-with-eureka: true
+    fetch-registry: true
     service-url:
       defaultZone: http://localhost:8761/eureka
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info
+  endpoint:
+    health:
+      show-details: always
