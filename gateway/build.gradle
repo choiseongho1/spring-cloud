@@ -26,7 +26,18 @@ dependencies {
     implementation 'org.springframework.boot:spring-boot-starter-webflux'
     implementation 'org.springframework.cloud:spring-cloud-starter-gateway'
     implementation 'org.springframework.cloud:spring-cloud-starter-netflix-eureka-client'
+    implementation 'org.springframework.cloud:spring-cloud-starter-config'
     implementation 'org.springframework.boot:spring-boot-starter-actuator'
+    implementation 'org.springframework.cloud:spring-cloud-starter-circuitbreaker-reactor-resilience4j'
+    
+    // Lombok
+    compileOnly 'org.projectlombok:lombok'
+    annotationProcessor 'org.projectlombok:lombok'
+    
+    // Redis Rate Limiter
+    implementation 'org.springframework.boot:spring-boot-starter-data-redis-reactive'
+    
+    testImplementation 'org.springframework.boot:spring-boot-starter-test'
 }
 
 dependencyManagement {

@@ -6,7 +6,7 @@ plugins {
 
 group = 'com.msa'
 version = '0.0.1-SNAPSHOT'
-description = 'eureka'
+description = 'config'
 
 java {
     toolchain {
@@ -23,18 +23,23 @@ ext {
 }
 
 dependencies {
-    implementation 'org.springframework.cloud:spring-cloud-starter-netflix-eureka-server'
+    implementation 'org.springframework.boot:spring-boot-starter-web'
+    implementation 'org.springframework.cloud:spring-cloud-config-server'
+    implementation 'org.springframework.cloud:spring-cloud-starter-netflix-eureka-client'
     implementation 'org.springframework.boot:spring-boot-starter-actuator'
     
     // Lombok
     compileOnly 'org.projectlombok:lombok'
     annotationProcessor 'org.projectlombok:lombok'
     
-    // Spring Security (선택적)
+    // Spring Security (선택적 - 설정 암호화에 사용)
+    // implementation 'org.springframework.cloud:spring-cloud-config-server-encryption'
     // implementation 'org.springframework.boot:spring-boot-starter-security'
-
+    
+    // Git 저장소 사용 시
+    // implementation 'org.eclipse.jgit:org.eclipse.jgit'
+    
     testImplementation 'org.springframework.boot:spring-boot-starter-test'
-    testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
 }
 
 dependencyManagement {
