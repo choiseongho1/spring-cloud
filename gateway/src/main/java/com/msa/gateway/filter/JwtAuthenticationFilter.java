@@ -112,12 +112,6 @@ public class JwtAuthenticationFilter extends AbstractGatewayFilterFactory<JwtAut
                     role = "SUPER_ADMIN";
                 }
                 
-                // 사용자명이 "super_admin"인 경우 SUPER_ADMIN 권한 부여 (테스트용)
-                if ("super_admin".equals(username)) {
-                    role = "SUPER_ADMIN";
-                    log.info("[게이트웨이 필터] super_admin 사용자에게 SUPER_ADMIN 권한 부여");
-                }
-                
                 ServerHttpRequest enrichedRequest = request.mutate()
                     .header("X-Auth-UserId", userId)
                     .header("X-Auth-Username", username)
