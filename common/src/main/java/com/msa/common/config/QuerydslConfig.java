@@ -1,4 +1,4 @@
-package com.msa.member.config;
+package com.msa.common.config;
 
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import jakarta.persistence.EntityManager;

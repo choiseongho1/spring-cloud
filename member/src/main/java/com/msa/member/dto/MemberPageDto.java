@@ -12,17 +12,15 @@ public class MemberPageDto {
     
     private Long id;
     private String username;
-    private String password;
     private String name;
     private String email;
     private Integer age;
     private Member.Role role;
     
     @QueryProjection
-    public MemberPageDto(Long id, String username, String password, String name, String email, Integer age, Member.Role role) {
+    public MemberPageDto(Long id, String username, String name, String email, Integer age, Member.Role role) {
         this.id = id;
         this.username = username;
-        this.password = password;
         this.name = name;
         this.email = email;
         this.age = age;

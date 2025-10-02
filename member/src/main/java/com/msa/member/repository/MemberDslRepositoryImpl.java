@@ -1,5 +1,7 @@
 package com.msa.member.repository;
 
+import com.msa.common.util.QueryUtils;
+import com.msa.member.domain.Member;
 import com.msa.member.dto.MemberPageDto;
 import com.msa.member.dto.QMemberPageDto;
 import com.querydsl.core.types.Predicate;
@@ -17,12 +19,11 @@ import java.util.List;
 import static com.msa.member.domain.QMember.member;
 
 /**
- * MemoDslRepository 구현체
+ * MemberDslRepository 구현체
  */
 @Repository
 @RequiredArgsConstructor
 public class MemberDslRepositoryImpl implements MemberDslRepository {
-
 
     private final JPAQueryFactory queryFactory;
 
@@ -58,7 +59,6 @@ public class MemberDslRepositoryImpl implements MemberDslRepository {
                 .select(new QMemberPageDto(
                         member.id,
                         member.username,
-                        member.password,
                         member.name,
                         member.email,
                         member.age,
@@ -71,6 +71,8 @@ public class MemberDslRepositoryImpl implements MemberDslRepository {
     // findMemberListWithPaging 조회 조건
     private Predicate[] memberListSearchCondition(){
         List<Predicate> predicates = new ArrayList<>();
+
+        predicates.add(QueryUtils.eq(Member.Role.ROLE_USER , member.role));
 
         return predicates.toArray(new Predicate[0]);
     }

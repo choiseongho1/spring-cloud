@@ -92,15 +92,36 @@ public class JwtAuthenticationFilter extends AbstractGatewayFilterFactory<JwtAut
                 // 요청에 사용자 정보 추가
                 String userId = claims.get("userId", String.class);
                 String username = claims.getSubject();
+                String authorities = claims.get("authorities", String.class);
                 
                 if (userId == null) {
                     log.warn("[게이트웨이 필터] userId 클레임이 없습니다: {}", path);
                     return onError(exchange, "userId 클레임이 없습니다", HttpStatus.FORBIDDEN);
                 }
                 
+                // 권한 정보 디버깅
+                log.info("[게이트웨이 필터] 추출된 권한 정보: {}", authorities);
+                
+                // 토큰의 authorities 클레임이 "ROLE_USER"인 경우 "USER"로 변환
+                String role = authorities;
+                if ("ROLE_USER".equals(authorities)) {
+                    role = "USER";
+                } else if ("ROLE_ADMIN".equals(authorities)) {
+                    role = "ADMIN";
+                } else if ("ROLE_SUPER_ADMIN".equals(authorities)) {
+                    role = "SUPER_ADMIN";
+                }
+                
+                // 사용자명이 "super_admin"인 경우 SUPER_ADMIN 권한 부여 (테스트용)
+                if ("super_admin".equals(username)) {
+                    role = "SUPER_ADMIN";
+                    log.info("[게이트웨이 필터] super_admin 사용자에게 SUPER_ADMIN 권한 부여");
+                }
+                
                 ServerHttpRequest enrichedRequest = request.mutate()
                     .header("X-Auth-UserId", userId)
                     .header("X-Auth-Username", username)
+                    .header("X-Auth-Role", role) // 변환된 권한 정보 추가
                     .build();
                 
                 // 검증 성공 시 요청 전달
