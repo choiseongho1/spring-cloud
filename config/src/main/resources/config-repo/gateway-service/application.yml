@@ -10,9 +10,9 @@ spring:
             - id: member-service
               uri: lb://member-service
               predicates:
-                - Path=/member-service/**
+                - Path=/member-service/**,/member-service
               filters:
-                - RewritePath=/member-service/(?<segment>.*), /api/members/${segment}
+                - RewritePath=/member-service(/|$)(?<segment>.*), /api/members/${segment}
                 - JwtAuthenticationFilter
             - id: auth-service
               uri: lb://auth-service

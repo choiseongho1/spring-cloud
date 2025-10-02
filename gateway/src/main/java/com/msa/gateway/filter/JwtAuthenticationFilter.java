@@ -9,6 +9,7 @@ import org.springframework.cloud.gateway.filter.GatewayFilter;
 import org.springframework.cloud.gateway.filter.factory.AbstractGatewayFilterFactory;
 import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.server.reactive.ServerHttpRequest;
@@ -44,7 +45,7 @@ public class JwtAuthenticationFilter extends AbstractGatewayFilterFactory<JwtAut
             String path = request.getPath().toString();
             
             // 인증이 필요 없는 공개 경로 확인
-            if (isPublicPath(path)) {
+            if (isPublicPath(path, exchange)) {
                 return chain.filter(exchange);
             }
             
@@ -111,10 +112,22 @@ public class JwtAuthenticationFilter extends AbstractGatewayFilterFactory<JwtAut
         };
     }
 
-    private boolean isPublicPath(String path) {
-        return path.contains("/api/auth/") || 
-               path.contains("/api/public/") ||
-               path.contains("/actuator/");
+    private boolean isPublicPath(String path, ServerWebExchange exchange) {
+        // 기본 공개 경로 확인
+        if (path.contains("/api/auth/") ||
+            path.contains("/api/public/") ||
+            path.contains("/actuator/")) {
+            return true;
+        }
+        
+        // 특정 경로에 대해 HTTP 메소드 확인
+        ServerHttpRequest request = exchange.getRequest();
+        HttpMethod method = request.getMethod();
+        
+        // member-service에 대해 GET과 POST 메소드 허용
+        if (path.equals("/api/members/") && HttpMethod.POST.equals(method)) return true;
+
+        return false;
     }
 
     private boolean isValidToken(String token) {

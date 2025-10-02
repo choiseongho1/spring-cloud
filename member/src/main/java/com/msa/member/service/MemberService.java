@@ -1,9 +1,11 @@
 package com.msa.member.service;
 
 import com.msa.member.domain.Member;
+import com.msa.member.dto.MemberSaveDto;
 import com.msa.member.repository.MemberRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -23,15 +25,20 @@ public class MemberService {
      * 회원 생성 (비밀번호 암호화 적용)
      */
     @Transactional
-    public Member createMember(Member member) {
+    public void createMember(MemberSaveDto memberSaveDto) {
+        Optional<Member> opMember = findByUsername(memberSaveDto.getUsername());
+        opMember.ifPresent(member -> {
+            throw new RuntimeException("Member already exists with username: " + memberSaveDto.getUsername());
+        });
+
+
         // 비밀번호 암호화
-        if (member.getPassword() != null && !member.getPassword().isEmpty()) {
-            String hashedPassword = passwordEncoder.encode(member.getPassword());
-            member.setPassword(hashedPassword);
-            log.info("비밀번호 암호화 완료: {}", member.getUsername());
+        if (!StringUtils.isEmpty(memberSaveDto.getPassword())) {
+            String hashedPassword = passwordEncoder.encode(memberSaveDto.getPassword());
+            memberSaveDto.setPassword(hashedPassword);
         }
         
-        return memberRepository.save(member);
+        memberRepository.save(memberSaveDto.toEntity());
     }
     
     /**

@@ -13,7 +13,9 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @Slf4j
 @RestControllerAdvice
@@ -32,12 +34,30 @@ public class GlobalExceptionHandler {
         return new ResponseEntity<>(response, errorCode.getStatus());
     }
     
+    /**
+     * 유효성 검증 실패 시 처리
+     */
     @ExceptionHandler(MethodArgumentNotValidException.class)
-    public ResponseEntity<ResponseDto<Object>> handleMethodArgumentNotValidException(MethodArgumentNotValidException e) {
-        log.error("MethodArgumentNotValidException: {}", e.getMessage());
-        ErrorDto errorDto = createFieldErrorDto(e.getBindingResult());
-        ResponseDto<Object> response = ResponseDto.fail(ErrorCode.INVALID_INPUT_VALUE.getMessage(), errorDto);
-        return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
+    public ResponseEntity<ResponseDto<Map<String, String>>> handleValidationExceptions(
+            MethodArgumentNotValidException ex) {
+
+        log.error("유효성 검증 실패: {}", ex.getMessage());
+
+        BindingResult bindingResult = ex.getBindingResult();
+        Map<String, String> errors = new HashMap<>();
+
+        bindingResult.getAllErrors().forEach(error -> {
+            String fieldName = ((FieldError) error).getField();
+            String errorMessage = error.getDefaultMessage();
+            errors.put(fieldName, errorMessage);
+        });
+
+        ResponseDto<Map<String, String>> responseDto = ResponseDto.error(
+                "입력값 유효성 검증 실패",
+                errors
+        );
+
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(responseDto);
     }
     
     @ExceptionHandler(BindException.class)

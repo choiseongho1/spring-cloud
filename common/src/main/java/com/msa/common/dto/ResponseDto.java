@@ -61,4 +61,13 @@ public class ResponseDto<T> {
                 .timestamp(LocalDateTime.now())
                 .build();
     }
+    
+    public static <T> ResponseDto<T> error(String message, T data) {
+        return ResponseDto.<T>builder()
+                .success(false)
+                .message(message)
+                .data(data)
+                .timestamp(LocalDateTime.now())
+                .build();
+    }
 }
