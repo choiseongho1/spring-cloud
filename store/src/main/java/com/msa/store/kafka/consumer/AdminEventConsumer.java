@@ -15,6 +15,11 @@ public class AdminEventConsumer {
 
     private final StoreService storeService;
 
+    /**
+     * Kafka를 통해 전송된 관리자 이벤트를 수신하여 이벤트 유형에 맞게 처리한다.
+     *
+     * @param adminEvent 관리자의 생성/수정/삭제 이벤트 정보
+     */
     @KafkaListener(
             topics = "${kafka.topic.admin-events}",
             groupId = "${spring.kafka.consumer.group-id}",
