@@ -31,15 +31,16 @@ public class AuthController {
      */
     @PostMapping("/login")
     public ResponseEntity<ResponseDto<TokenDto>> login(@Valid @RequestBody LoginRequest loginRequest) {
-        log.info("[컨트롤러] 로그인 요청 수신: username={}", loginRequest.getUsername());
+        log.info("[컨트롤러] 로그인 요청: {}", loginRequest.getUsername());
         
         try {
             TokenDto tokenDto = authService.login(loginRequest);
-            log.info("[컨트롤러] 로그인 성공: username={}", loginRequest.getUsername());
+            log.info("[컨트롤러] 로그인 성공: {}", loginRequest.getUsername());
+            
             return ResponseEntity.ok(ResponseDto.success("로그인 성공", tokenDto));
         } catch (Exception e) {
-            log.error("[컨트롤러] 로그인 실패: username={}, 오류={}", loginRequest.getUsername(), e.getMessage());
-            throw e; // 예외 재발생
+            log.error("[컨트롤러] 로그인 실패: {}, 오류: {}", loginRequest.getUsername(), e.getMessage());
+            throw e;
         }
     }
 

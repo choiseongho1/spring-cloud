@@ -26,20 +26,13 @@ public class RefreshTokenService {
      * 리프레시 토큰 저장
      */
     public void saveRefreshToken(String username, String token) {
-        log.debug("[리프레시 토큰] 저장 시도: {}", username);
-        
         try {
-            Instant expiryDate = Instant.now().plusMillis(refreshTokenValidity);
-            
             // Redis에 저장 (키: "refresh_token:username", 값: 토큰)
             String key = REFRESH_TOKEN_PREFIX + username;
             redisTemplate.opsForValue().set(key, token);
             redisTemplate.expire(key, refreshTokenValidity, TimeUnit.MILLISECONDS);
-            
-            log.info("[리프레시 토큰] Redis에 저장 성공: {}", username);
         } catch (Exception e) {
-            log.error("[리프레시 토큰] 저장 실패: {}, 오류: {}", username, e.getMessage());
-            log.error("[리프레시 토큰] 오류 상세", e);
+            log.error("[리프레시 토큰] 저장 실패: {}", e.getMessage());
             throw e;
         }
     }
@@ -59,7 +52,6 @@ public class RefreshTokenService {
     public void deleteByUsername(String username) {
         String key = REFRESH_TOKEN_PREFIX + username;
         redisTemplate.delete(key);
-        log.info("[리프레시 토큰] 삭제 완료: {}", username);
     }
     
     /**

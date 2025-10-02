@@ -36,7 +36,7 @@ public class AuthService {
      */
     @Transactional
     public TokenDto login(LoginRequest loginRequest) {
-        log.info("[로그인] 로그인 시도: {}", loginRequest.getUsername());
+        log.info("[로그인] 시도: {}", loginRequest.getUsername());
         
         Authentication authentication;
         try {
@@ -47,42 +47,32 @@ public class AuthService {
                             loginRequest.getPassword()
                     )
             );
-            log.info("[로그인] 인증 성공: {}", loginRequest.getUsername());
-
+            
             // SecurityContext에 인증 정보 저장
             SecurityContextHolder.getContext().setAuthentication(authentication);
         } catch (Exception e) {
             log.error("[로그인] 인증 실패: {}, 오류: {}", loginRequest.getUsername(), e.getMessage());
-            log.error("[로그인] 오류 상세", e); // 스택 트레이스 출력
-            throw e; // 인증 실패 시 예외 재발생
+            throw e;
         }
         
         try {
-            // Member 서비스에서 추가 사용자 정보 조회
-            log.debug("[로그인] Member 서비스에서 사용자 정보 조회 시도: {}", loginRequest.getUsername());
+            // Member 서비스에서 사용자 정보 조회
             MemberDto memberDto = memberServiceClient.getMemberByUsername(loginRequest.getUsername());
-            log.info("[로그인] Member 서비스에서 사용자 정보 조회 성공: {}", memberDto.getUsername());
             
             // 토큰 생성 (Member 서비스에서 가져온 정보 포함)
-            log.debug("[로그인] 토큰 생성 시도 (Member 정보 포함)");
             String accessToken = jwtTokenProvider.generateAccessToken(authentication, memberDto);
             String refreshToken = jwtTokenProvider.generateRefreshToken(authentication);
-            log.info("[로그인] 토큰 생성 성공: {}", loginRequest.getUsername());
             
             // 리프레시 토큰 저장
             saveRefreshToken(authentication.getName(), refreshToken);
-            log.debug("[로그인] 리프레시 토큰 저장 완료");
             
             return TokenDto.of(accessToken, refreshToken, accessTokenValidity / 1000);
         } catch (Exception e) {
-            log.error("[로그인] Member 서비스 호출 중 오류 발생: {}, 오류: {}", loginRequest.getUsername(), e.getMessage());
-            log.error("[로그인] 오류 상세", e); // 스택 트레이스 출력
+            log.error("[로그인] Member 서비스 호출 오류: {}", e.getMessage());
             
             // 기본 토큰 생성 (Member 서비스 정보 없이)
-            log.debug("[로그인] 기본 토큰 생성 시도");
             String accessToken = jwtTokenProvider.generateAccessToken(authentication);
             String refreshToken = jwtTokenProvider.generateRefreshToken(authentication);
-            log.info("[로그인] 기본 토큰 생성 성공");
             
             // 리프레시 토큰 저장
             saveRefreshToken(authentication.getName(), refreshToken);
@@ -119,7 +109,6 @@ public class AuthService {
         try {
             // Member 서비스에서 최신 사용자 정보 조회
             MemberDto memberDto = memberServiceClient.getMemberByUsername(username);
-            log.info("Member 서비스에서 사용자 정보 조회 성공 (refreshToken): {}", memberDto.getUsername());
             
             // 최신 정보로 토큰 생성
             String newAccessToken = jwtTokenProvider.generateAccessToken(authentication, memberDto);
@@ -130,9 +119,9 @@ public class AuthService {
             
             return TokenDto.of(newAccessToken, newRefreshToken, accessTokenValidity / 1000);
         } catch (Exception e) {
-            log.error("Member 서비스 호출 중 오류 발생 (refreshToken): {}", e.getMessage());
+            log.error("[토큰 갱신] Member 서비스 호출 오류: {}", e.getMessage());
             
-            // 기본 토큰 생성 (Member 서비스 정보 없이)
+            // 기본 토큰 생성
             String newAccessToken = jwtTokenProvider.generateAccessToken(authentication);
             String newRefreshToken = jwtTokenProvider.generateRefreshToken(authentication);
             

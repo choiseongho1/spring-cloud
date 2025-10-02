@@ -30,7 +30,7 @@ public class JwtAuthenticationFilter extends AbstractGatewayFilterFactory<JwtAut
     private static final String AUTH_HEADER = "Authorization";
     private static final String TOKEN_PREFIX = "Bearer ";
     
-    @Value("${jwt.secret:defaultSecretKeyForDevelopmentEnvironmentOnly}")
+    @Value("${jwt.secret}")
     private String secret;
 
     public JwtAuthenticationFilter() {
@@ -42,11 +42,9 @@ public class JwtAuthenticationFilter extends AbstractGatewayFilterFactory<JwtAut
         return (exchange, chain) -> {
             ServerHttpRequest request = exchange.getRequest();
             String path = request.getPath().toString();
-            log.info("[게이트웨이 필터] 요청 경로: {}", path);
             
             // 인증이 필요 없는 공개 경로 확인
             if (isPublicPath(path)) {
-                log.info("[게이트웨이 필터] 공개 경로 접근 허용: {}", path);
                 return chain.filter(exchange);
             }
             
@@ -64,7 +62,15 @@ public class JwtAuthenticationFilter extends AbstractGatewayFilterFactory<JwtAut
             }
             
             token = token.substring(TOKEN_PREFIX.length());
-            log.debug("[게이트웨이 필터] 토큰 추출 성공: {}", path);
+            
+            // 토큰이 중복되어 있는지 확인
+            if (token.contains(".") && token.split("\\.").length > 3) {
+                // JWT는 헤더.페이로드.서명 형태로 구성되어 있으므로 첫 번째 토큰만 추출
+                String[] parts = token.split("\\.");
+                if (parts.length >= 3) {
+                    token = parts[0] + "." + parts[1] + "." + parts[2];
+                }
+            }
             
             // 토큰 검증
             try {
@@ -82,10 +88,6 @@ public class JwtAuthenticationFilter extends AbstractGatewayFilterFactory<JwtAut
             try {
                 Claims claims = extractClaims(token);
                 
-                // 토큰 클레임 로깅
-                log.debug("[게이트웨이 필터] 토큰 클레임 - subject: {}, userId: {}", 
-                        claims.getSubject(), claims.get("userId"));
-                
                 // 요청에 사용자 정보 추가
                 String userId = claims.get("userId", String.class);
                 String username = claims.getSubject();
@@ -100,13 +102,11 @@ public class JwtAuthenticationFilter extends AbstractGatewayFilterFactory<JwtAut
                     .header("X-Auth-Username", username)
                     .build();
                 
-                log.info("[게이트웨이 필터] 인증 성공, 사용자: {}, 경로: {}", username, path);
-                
                 // 검증 성공 시 요청 전달
                 return chain.filter(exchange.mutate().request(enrichedRequest).build());
             } catch (Exception e) {
-                log.error("[게이트웨이 필터] 사용자 정보 추출 오류: {} - {}", path, e.getMessage());
-                return onError(exchange, "사용자 정보 추출 오류: " + e.getMessage(), HttpStatus.FORBIDDEN);
+                log.error("[게이트웨이 필터] 사용자 정보 추출 오류: {}", e.getMessage());
+                return onError(exchange, "사용자 정보 추출 오류", HttpStatus.FORBIDDEN);
             }
         };
     }
@@ -127,28 +127,23 @@ public class JwtAuthenticationFilter extends AbstractGatewayFilterFactory<JwtAut
             boolean isValid = !expiration.before(now);
             
             if (!isValid) {
-                log.warn("[게이트웨이 필터] 토큰 만료: 만료시간={}, 현재시간={}", expiration, now);
-            } else {
-                log.debug("[게이트웨이 필터] 토큰 유효성 검증 성공: 만료시간={}", expiration);
+                log.warn("[게이트웨이 필터] 토큰 만료");
             }
             
             return isValid;
         } catch (Exception e) {
-            log.error("[게이트웨이 필터] 토큰 검증 중 예외 발생: {}", e.getMessage());
+            log.error("[게이트웨이 필터] 토큰 검증 오류: {}", e.getMessage());
             return false;
         }
     }
     
     private Claims extractClaims(String token) {
         try {
-            Claims claims = Jwts.parserBuilder()
+            return Jwts.parserBuilder()
                     .setSigningKey(getSigningKey())
                     .build()
                     .parseClaimsJws(token)
                     .getBody();
-            
-            log.debug("[게이트웨이 필터] 토큰 클레임 추출 성공: subject={}", claims.getSubject());
-            return claims;
         } catch (Exception e) {
             log.error("[게이트웨이 필터] 토큰 클레임 추출 오류: {}", e.getMessage());
             throw e;
@@ -164,7 +159,7 @@ public class JwtAuthenticationFilter extends AbstractGatewayFilterFactory<JwtAut
         ServerHttpRequest request = exchange.getRequest();
         String path = request.getPath().toString();
         
-        log.error("[게이트웨이 필터] 접근 거부: {} - 경로: {}, 상태코드: {}", message, path, status.value());
+        log.error("[게이트웨이 필터] 접근 거부: {} - 경로: {}", message, path);
         
         ServerHttpResponse response = exchange.getResponse();
         response.setStatusCode(status);

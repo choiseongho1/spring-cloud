@@ -1,6 +1,5 @@
 package com.msa.member.controller;
 
-import com.msa.common.dto.ResponseDto;
 import com.msa.member.domain.Member;
 import com.msa.member.dto.MemberDto;
 import com.msa.member.service.MemberService;
@@ -39,21 +38,10 @@ public class InternalApiController {
             
             if (memberOptional.isPresent()) {
                 Member member = memberOptional.get();
-                log.info("[내부 API] 회원 조회 성공: {}, id={}", username, member.getId());
-                
-                // 비밀번호 로깅 (주의: 실제 환경에서는 절대 비밀번호를 로깅하면 안됨)
-                String passwordInfo = "[비밀번호 없음]"; 
-                if (member.getPassword() != null && !member.getPassword().isEmpty()) {
-                    passwordInfo = member.getPassword().startsWith("$2") ? "[암호화됨]" : "[암호화되지 않음]"; 
-                }
-                log.debug("[내부 API] 회원 정보 - id: {}, username: {}, 비밀번호: {}, 이메일: {}, 역할: {}", 
-                        member.getId(), member.getUsername(), passwordInfo, member.getEmail(), member.getRole());
-                
+
                 // DTO 변환
                 MemberDto dto = MemberDto.from(member);
-                log.debug("[내부 API] DTO 변환 완료 - password 포함 여부: {}", 
-                        (dto.getPassword() != null && !dto.getPassword().isEmpty() ? "O" : "X"));
-                
+
                 return ResponseEntity.ok(dto);
             } else {
                 log.warn("[내부 API] 회원 조회 실패 - 사용자 없음: {}", username);
