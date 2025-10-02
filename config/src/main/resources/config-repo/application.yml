@@ -16,13 +16,6 @@ spring:
     serialization:
       fail-on-empty-beans: false
 
-# 공통 로깅 설정
-logging:
-  level:
-    root: INFO
-    org.springframework.web: INFO
-    org.hibernate: INFO
-    com.msa: DEBUG
 
 # 공통 Actuator 설정
 management:

@@ -3,6 +3,7 @@ package com.msa.member.dto;
 import com.msa.member.domain.Member;
 import jakarta.validation.constraints.NotNull;
 import lombok.*;
+import org.apache.commons.lang3.StringUtils;
 
 @Getter
 @Setter
@@ -36,8 +37,21 @@ public class MemberSaveDto {
                 .name(name)
                 .email(email)
                 .age(age)
-                .role(Member.Role.valueOf(role))
+                .role(convertRole(role))
                 .build();
+    }
+    
+    private Member.Role convertRole(String role) {
+        if (StringUtils.isEmpty(role)) {
+            return Member.Role.ROLE_USER;
+        }
+        
+        try {
+            return Member.Role.valueOf(role);
+        } catch (IllegalArgumentException e) {
+            // 잘못된 role 값이 들어온 경우 기본값 반환
+            return Member.Role.ROLE_USER;
+        }
     }
 
 
