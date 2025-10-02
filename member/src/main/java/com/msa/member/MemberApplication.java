@@ -7,7 +7,7 @@ import org.springframework.context.annotation.ComponentScan;
 
 @SpringBootApplication
 @EnableDiscoveryClient
-@ComponentScan({"com.msa.member", "com.msa.common.exception", "com.msa.common.config"})
+@ComponentScan({"com.msa.member", "com.msa.common.exception", "com.msa.common.config", "com.msa.common.auth"})
 public class MemberApplication {
 
 	public static void main(String[] args) {

@@ -23,12 +23,9 @@ public class UserDetailsServiceImpl implements UserDetailsService {
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
         try {
-            log.info("[인증] 사용자 정보 조회 시작: {}", username);
-            
             // Member 서비스에서 사용자 정보 조회
             MemberDto memberDto = memberServiceClient.getMemberByUsername(username);
-            log.info("[인증] Member 서비스에서 사용자 정보 조회 성공: {}", username);
-            
+
             // 비밀번호 유효성 간단히 검사
             if (memberDto.getPassword() == null || memberDto.getPassword().isEmpty()) {
                 log.error("[인증] 비밀번호가 비어있습니다: {}", username);
@@ -38,10 +35,8 @@ public class UserDetailsServiceImpl implements UserDetailsService {
             UserDetails userDetails = new User(
                     memberDto.getUsername(),
                     memberDto.getPassword() != null ? memberDto.getPassword() : "", // null 처리
-                    Collections.singletonList(new SimpleGrantedAuthority("ROLE_USER"))
+                    Collections.singletonList(new SimpleGrantedAuthority(memberDto.getRole()))
             );
-            
-            log.info("[인증] UserDetails 생성 성공: {}", userDetails.getUsername());
             
             return userDetails;
         } catch (Exception e) {

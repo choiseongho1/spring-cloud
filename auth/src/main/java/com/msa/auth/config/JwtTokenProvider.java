@@ -5,6 +5,7 @@ import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.security.Keys;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -20,6 +21,7 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 
 @Component
+@Slf4j
 public class JwtTokenProvider {
 
     @Value("${jwt.secret}")
@@ -87,6 +89,9 @@ public class JwtTokenProvider {
                 .collect(Collectors.joining(","));
         claims.put("authorities", authorities);
         
+        // 권한 정보 추가 로그
+        log.debug("[토큰 생성] 추가된 권한 정보: {}", authorities);
+        
         // Member 서비스에서 가져온 정보 추가
         claims.put("userId", memberDto.getId().toString());
         claims.put("name", memberDto.getName());
@@ -104,6 +109,9 @@ public class JwtTokenProvider {
                 .map(GrantedAuthority::getAuthority)
                 .collect(Collectors.joining(","));
         claims.put("authorities", authorities);
+        
+        // 권한 정보 추가 로그
+        log.debug("[토큰 생성] 추가된 권한 정보: {}", authorities);
         
         // 사용자 정보가 UserDetails 타입인 경우 userId 추출
         if (authentication.getPrincipal() instanceof UserDetails) {

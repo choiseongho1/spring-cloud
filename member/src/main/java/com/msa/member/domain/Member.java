@@ -40,12 +40,12 @@ public class Member {
     private String password;
     
     @Enumerated(EnumType.STRING)
-    @Column(nullable = false, length = 20)
+    @Column(nullable = false, length = 30)
     private Role role;
     
     public enum Role {
         ROLE_USER,
         ROLE_ADMIN,
-        SUPER_ADMIN
+        ROLE_SUPER_ADMIN
     }
 }

@@ -82,9 +82,16 @@ dependencies {
     compileOnly 'jakarta.annotation:jakarta.annotation-api:2.1.1'
 
 
-    // Spring Security - 메서드 수준 보안만 사용
+    // Spring Security - 웹 보안 및 메서드 수준 보안 사용
    	api 'org.springframework.security:spring-security-core'
     api 'org.springframework.security:spring-security-crypto'
+    api 'org.springframework.security:spring-security-web'
+    api 'org.springframework.security:spring-security-config'
+    
+    // JWT 사용을 위한 의존성
+    api 'io.jsonwebtoken:jjwt-api:0.11.5'
+    runtimeOnly 'io.jsonwebtoken:jjwt-impl:0.11.5'
+    runtimeOnly 'io.jsonwebtoken:jjwt-jackson:0.11.5'
 
 }
 

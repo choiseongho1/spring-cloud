@@ -5,6 +5,8 @@ import com.msa.common.dto.ResponseDto;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.AccessDeniedException;
+import org.springframework.security.authorization.AuthorizationDeniedException;
 import org.springframework.validation.BindException;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.FieldError;
@@ -81,6 +83,36 @@ public class GlobalExceptionHandler {
         return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
     }
 
+    /**
+     * Spring Security의 AuthorizationDeniedException 처리
+     */
+    @ExceptionHandler(AuthorizationDeniedException.class)
+    public ResponseEntity<ResponseDto<Object>> handleAuthorizationDeniedException(AuthorizationDeniedException e) {
+        log.warn("권한 없음: {}", e.getMessage());
+        ErrorDto errorDto = ErrorDto.builder()
+                .code(ErrorCode.PERMISSION_DENIED.getCode())
+                .message("요청한 리소스에 접근할 권한이 없습니다.")
+                .build();
+        
+        ResponseDto<Object> response = ResponseDto.fail(ErrorCode.PERMISSION_DENIED.getMessage(), errorDto);
+        return new ResponseEntity<>(response, HttpStatus.FORBIDDEN);
+    }
+    
+    /**
+     * Spring Security의 AccessDeniedException 처리
+     */
+    @ExceptionHandler(AccessDeniedException.class)
+    public ResponseEntity<ResponseDto<Object>> handleAccessDeniedException(AccessDeniedException e) {
+        log.warn("접근 거부: {}", e.getMessage());
+        ErrorDto errorDto = ErrorDto.builder()
+                .code(ErrorCode.ACCESS_DENIED.getCode())
+                .message("접근이 거부되었습니다.")
+                .build();
+        
+        ResponseDto<Object> response = ResponseDto.fail(ErrorCode.ACCESS_DENIED.getMessage(), errorDto);
+        return new ResponseEntity<>(response, HttpStatus.FORBIDDEN);
+    }
+    
     @ExceptionHandler(Exception.class)
     public ResponseEntity<ResponseDto<Object>> handleException(Exception e) {
         log.error("Exception: {}", e.getMessage(), e);
