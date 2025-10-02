@@ -8,7 +8,7 @@ import com.msa.member.domain.Member;
 import java.util.Optional;
 
 @Repository
-public interface MemberRepository extends JpaRepository<Member, Long> {
+public interface MemberRepository extends JpaRepository<Member, Long>, MemberDslRepository {
     
     Optional<Member> findByUsername(String username);
 }

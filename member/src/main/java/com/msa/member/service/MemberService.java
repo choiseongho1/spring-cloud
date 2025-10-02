@@ -1,11 +1,14 @@
 package com.msa.member.service;
 
 import com.msa.member.domain.Member;
+import com.msa.member.dto.MemberPageDto;
 import com.msa.member.dto.MemberSaveDto;
 import com.msa.member.repository.MemberRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -40,7 +43,16 @@ public class MemberService {
         
         memberRepository.save(memberSaveDto.toEntity());
     }
-    
+
+
+    /**
+     * 모든 회원 조회
+     */
+    @Transactional(readOnly = true)
+    public Page<MemberPageDto> findMemberListWithPaging(Pageable pageable) {
+        return memberRepository.findMemberListWithPaging(pageable);
+    }
+
     /**
      * 회원 수정 (비밀번호 변경 시 암호화 적용)
      */
@@ -71,13 +83,7 @@ public class MemberService {
         memberRepository.deleteById(id);
     }
     
-    /**
-     * 모든 회원 조회
-     */
-    @Transactional(readOnly = true)
-    public List<Member> getAllMembers() {
-        return memberRepository.findAll();
-    }
+
     
     /**
      * 회원 ID로 조회 
